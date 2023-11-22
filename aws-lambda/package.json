@@ -15,7 +15,8 @@
     "unit": "jest",
     "lint": "eslint '*.ts' --quiet --fix",
     "compile": "tsc",
-    "test": "npm run compile && npm run unit"
+    "test": "npm run compile && npm run unit",
+    "start:local": "rm -r .aws-sam & tsc -w && sam local start-api"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.92",
