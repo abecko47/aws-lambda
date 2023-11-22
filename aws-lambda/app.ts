@@ -36,7 +36,6 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
     }
 
     if (repeater.action === 'repeat') {
-        console.log({ repeater });
         return {
             statusCode: 200,
             body: JSON.stringify(repeater),
