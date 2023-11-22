@@ -1,5 +1,6 @@
 import jwt, {Algorithm} from "jsonwebtoken";
 import JwksRsa from "jwks-rsa";
+import {jwtUrl} from "../util/const";
 
 export const isValidToken = async (token: string | undefined): Promise<boolean> => {
     if (!token) {
@@ -18,7 +19,7 @@ export const isValidToken = async (token: string | undefined): Promise<boolean> 
         cache: true,
         rateLimit: true,
         jwksRequestsPerMinute: 5,
-        jwksUri: `https://auth.plasmics.com/.well-known/jwks.json`
+        jwksUri: jwtUrl,
     }).getSigningKey(decodedToken.header.kid)).getPublicKey();
 
     try {
