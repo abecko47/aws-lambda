@@ -1,4 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import {verify} from "jsonwebtoken";
+import axios from "axios";
 
 /**
  *
@@ -10,8 +12,29 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
  *
  */
 
+type PublicKeyDto = {
+    keys: {kty: string, use: string, n: string}[],
+    alg: string,
+}
+
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     let response: APIGatewayProxyResult;
+
+    const publicKey = await axios.get<PublicKeyDto>("https://auth.plasmics.com/.well-known/jwks.json");
+    if (publicKey.data.keys.length === 0) {
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                message: "Couldn't read public key",
+            }),
+        };
+    }
+
+    const key = publicKey.data.keys[0];
+
+    const validate = verify("", key.n);
+    console.log(validate)
+
     try {
         response = {
             statusCode: 200,
