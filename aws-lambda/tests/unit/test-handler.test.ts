@@ -5,13 +5,13 @@ import { expect, describe, it } from '@jest/globals';
 describe('Unit test for app handler', function () {
     it('verifies successful response', async () => {
         const event: APIGatewayProxyEvent = {
-            httpMethod: 'get',
+            httpMethod: 'post',
             body: '',
             headers: {},
             isBase64Encoded: false,
             multiValueHeaders: {},
             multiValueQueryStringParameters: {},
-            path: '/hello',
+            path: '/printer',
             pathParameters: {},
             queryStringParameters: {},
             requestContext: {
@@ -42,7 +42,7 @@ describe('Unit test for app handler', function () {
                     userAgent: '',
                     userArn: '',
                 },
-                path: '/hello',
+                path: '/printer',
                 protocol: 'HTTP/1.1',
                 requestId: 'c6af9ac6-7b61-11e6-9a41-93e8deadbeef',
                 requestTimeEpoch: 1428582896000,
@@ -55,11 +55,6 @@ describe('Unit test for app handler', function () {
         };
         const result: APIGatewayProxyResult = await lambdaHandler(event);
 
-        expect(result.statusCode).toEqual(200);
-        expect(result.body).toEqual(
-            JSON.stringify({
-                message: 'hello world',
-            }),
-        );
+        expect(result.statusCode).toEqual(401);
     });
 });
