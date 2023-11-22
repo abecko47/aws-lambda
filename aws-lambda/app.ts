@@ -1,7 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import jwt, {Algorithm} from "jsonwebtoken";
-import JwksRsa from "jwks-rsa";
 import {isValidToken} from "./middleware/auth";
+import {isRepeaterObject, Repeater} from "./util/dto";
 /**
  *
  * Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
@@ -14,6 +13,27 @@ import {isValidToken} from "./middleware/auth";
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     let response: APIGatewayProxyResult;
+
+    if (!event.body) {
+        return {
+            statusCode: 400,
+            body: JSON.stringify({
+                message: "Bad request",
+            }),
+        };
+    }
+
+    const body = JSON.parse(event.body);
+
+    if (!isRepeaterObject(body)) {
+        return {
+            statusCode: 400,
+            body: JSON.stringify({
+                message: "Bad request",
+            }),
+        };
+    }
+
 
     if (!(await isValidToken(event.headers["Authorization"]))) {
         return {
