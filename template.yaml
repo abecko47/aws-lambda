@@ -15,7 +15,7 @@ Globals:
     LoggingConfig:
       LogFormat: JSON
 Resources:
-  ValidatePrinterFunction:
+  ValidatePayloadFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       CodeUri: aws-lambda/
@@ -24,10 +24,10 @@ Resources:
       Architectures:
       - x86_64
       Events:
-        HelloWorld:
+        ValidatePayload:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /printer
+            Path: /validate
             Method: post
     Metadata: # Manage esbuild properties
       BuildMethod: esbuild
@@ -42,12 +42,12 @@ Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
   # Find out more about other implicit resources you can reference within SAM
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  HelloWorldApi:
+  ValidatePayloadApi:
     Description: API Gateway endpoint URL for Prod stage for Validating Payload
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-  ValidatePrinterFunction:
+  ValidatePayloadFunction:
     Description: Validating Payload Lambda Function ARN
-    Value: !GetAtt ValidatePrinterFunction.Arn
-  ValidatePrinterFunctionIamRole:
+    Value: !GetAtt ValidatePayloadFunction.Arn
+  ValidatePayloadFunctionIamRole:
     Description: Implicit IAM Role created for Validating Payload function
-    Value: !GetAtt ValidatePrinterFunctionRole.Arn
+    Value: !GetAtt ValidatePayloadFunctionRole.Arn
