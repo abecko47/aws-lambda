@@ -12,54 +12,47 @@ import {isRepeaterObject, Repeater} from "./util/dto";
  */
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    let response: APIGatewayProxyResult;
+    if (!(await isValidToken(event.headers["Authorization"]))) {
+        return {
+            statusCode: 401,
+            body: "Unauthorized",
+        };
+    }
 
     if (!event.body) {
         return {
             statusCode: 400,
-            body: JSON.stringify({
-                message: "Bad request",
-            }),
-        };
+            body: "Bad request",
+        };;
     }
 
-    const body = JSON.parse(event.body);
+    const repeater: Repeater = JSON.parse(event.body);
 
-    if (!isRepeaterObject(body)) {
+    if (!isRepeaterObject(repeater)) {
         return {
             statusCode: 400,
-            body: JSON.stringify({
-                message: "Bad request",
-            }),
+            body: "Bad request",
         };
     }
 
-
-    if (!(await isValidToken(event.headers["Authorization"]))) {
+    if (repeater.action === "repeat") {
+        console.log({repeater});
         return {
-            statusCode: 401,
-            body: JSON.stringify({
-                message: "Unaithorized",
-            }),
-        };
-    }
-
-    try {
-        response = {
             statusCode: 200,
-            body: JSON.stringify({
-                message: 'hello world',
-            }),
-        };
-    } catch (err: unknown) {
-        console.error(err);
-        response = {
-            statusCode: 500,
-            body: JSON.stringify({
-                message: err instanceof Error ? err.message : 'some error happened',
-            }),
+            body: JSON.stringify(repeater),
         };
     }
 
-    return response;
+    if (repeater.action === "log") {
+        console.log({repeater});
+        return {
+            statusCode: 200,
+            body: "",
+        };
+    }
+
+    return {
+        statusCode: 400,
+        body: "Bad request",
+    };
 };
