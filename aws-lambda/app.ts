@@ -1,6 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import jwt, {Algorithm} from "jsonwebtoken";
 import JwksRsa from "jwks-rsa";
+import {isValidToken} from "./middleware/auth";
 /**
  *
  * Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
@@ -11,57 +12,10 @@ import JwksRsa from "jwks-rsa";
  *
  */
 
-type PublicKeyDto = {
-    keys: {
-        kty: string,
-        n: string,
-        e: string,
-        kid: string,
-        x5t: string,
-        x5c: string[],
-    }[],
-    alg: string,
-}
-
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     let response: APIGatewayProxyResult;
 
-    const headers = event.headers;
-
-    if (!headers["Authorization"]) {
-        return {
-            statusCode: 401,
-            body: JSON.stringify({
-                message: "Unaithorized",
-            }),
-        };
-    }
-
-    const token = headers["Authorization"];
-    const decodedToken = jwt.decode(token, { complete: true });
-
-
-    if (!decodedToken || !decodedToken.header.kid || !decodedToken.header.alg) {
-        return {
-            statusCode: 401,
-            body: JSON.stringify({
-                message: "Unaithorized",
-            }),
-        };
-    }
-
-    const algorithm: Algorithm = decodedToken.header.alg as Algorithm;
-
-    const publicKey = (await JwksRsa({
-        cache: true,
-        rateLimit: true,
-        jwksRequestsPerMinute: 5,
-        jwksUri: `https://auth.plasmics.com/.well-known/jwks.json`
-    }).getSigningKey(decodedToken?.header.kid)).getPublicKey();
-
-    try {
-        jwt.verify(token, publicKey,{algorithms: [algorithm]});
-    } catch {
+    if (!(await isValidToken(event.headers["Authorization"]))) {
         return {
             statusCode: 401,
             body: JSON.stringify({
